@@ -1,29 +1,19 @@
-const express = require('express');
-const rateLimit = require('express-rate-limit');
-const fs = require('fs');
+import { Hono } from "hono";
+import fs from "fs";
 
-const app = express();
+const app = new Hono();
 const PORT = process.env.PORT || 3000;
 
 // Load reasons from JSON
-const reasons = JSON.parse(fs.readFileSync('./reasons.json', 'utf-8'));
-
-// Rate limiter: 10 requests per minute per IP
-// const limiter = rateLimit({
-//   windowMs: 60 * 1000, // 1 minute
-//   max: 10,
-//   message: { error: "Too many requests, please try again later." }
-// });
-
-// app.use(limiter);
+const reasons = JSON.parse(fs.readFileSync("./reasons.json", "utf-8"));
 
 // Random rejection reason endpoint
-app.get('/no', (req, res) => {
+app.get("/no", (c) => {
   const reason = reasons[Math.floor(Math.random() * reasons.length)];
-  res.json({ reason });
+  return c.text(reason);
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`No-as-a-Service is running on port ${PORT}`);
-});
+export default {
+  port: PORT,
+  fetch: app.fetch,
+};
